@@ -60,7 +60,7 @@ class OnlineLearningModel:
     - 'temporal_pc': Temporal Predictive Coding
     - 'lwpr': Locally Weighted Projection Regression
     - 'log_gp': Logarithmic Gaussian Process
-    - 'cerebnet': Cerebellum-inspired algorithm
+    - 'cerebnet': CerebNet (Kalidindi et al., 2019)
 
     Usage:
     ------
@@ -252,7 +252,7 @@ class OnlineLearningModel:
 
 
     def _init_cerebnet(self, **kwargs):
-        """Initialize Cerebellum-inspired model."""
+        """Initialize CerebNet."""
         if CerebNet is None:
             raise ImportError("CerebNet not available.")
 

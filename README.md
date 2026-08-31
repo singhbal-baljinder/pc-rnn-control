@@ -1,4 +1,4 @@
-# Cerebellum-inspired online learning for a cable-driven soft arm
+# Adaptive internal model for soft robot shape control
 
 Code and data for the paper's two experiments on a cable-driven soft arm
 (`docs/paper.pdf`):
@@ -111,10 +111,10 @@ shipped file matches what was executed:
 | `version` | `5, 19, 21, 23, 35` | test trajectory |
 | `desired_freq` | `[10]`, `[20]` | control rate of this run |
 | `condition` | `""`, `"_fault"` | nominal, or motor 0 frozen |
-| `USE_CEREBELLUM` | `True` / `False` | a learner, or a baseline |
-| `CEREBELLUM_METHOD` | `temporal_pc`, `cerebnet`, `log_gp`, `lwpr`, `rnn-uoro` | which learner |
+| `USE_ADAPTIVE_MODEL` | `True` / `False` | a learner, or a baseline |
+| `ADAPTIVE_METHOD` | `temporal_pc`, `cerebnet`, `log_gp`, `lwpr`, `rnn-uoro` | which learner |
 | `idx_trial` | `0, 20, 40, 60` | trial index — **for PC-RNN-I this selects *N*** (below) |
-| `TEST_CLOSED_LOOP_WITHOUT_ADAPTATION` | `True` / `False` | when `USE_CEREBELLUM=False`: NCL-C, or OL-C |
+| `TEST_CLOSED_LOOP_WITHOUT_ADAPTATION` | `True` / `False` | when `USE_ADAPTIVE_MODEL=False`: NCL-C, or OL-C |
 
 The fault is a frozen motor 0 between samples 400 and 900 (`TIME_INTERVAL_BLOCKS`).
 
@@ -129,8 +129,8 @@ spiraling_babbling_{10|20}_Hz_test_trajectory_{v5|v19|v21|v23|v35}_mvel0.5[_suff
     <no suffix>                    the reference trajectory
     _closed_loop_seq0              NCL-C  (fixed policy, no online learning)
     _open_loop_seq0                OL-C   (no feedback)
-    _seq{cerebnet|log_gp|lwpr|rnn-uoro}_cerebellum0
-    _seqtemporal_pc_cerebellum{0|20|40|60}
+    _seq{cerebnet|log_gp|lwpr|rnn-uoro}_adaptive0
+    _seqtemporal_pc_adaptive{0|20|40|60}
 ```
 
 **PC-RNN-I's *N* is encoded in the trial index, not the filename:**
@@ -178,4 +178,3 @@ The RNN learning algorithms (`methods/rnn/`, MIT), the LoG-GP implementation
 (`methods/gp/log_gp.py`, BSD) and the OptiTrack client (`mocap/`, Apache-2.0)
 are third-party. Their licenses and attributions are in `NOTICE` and alongside
 the code. Everything else is under the BSD-3 `LICENSE`.
-# pc_rnn_control

@@ -109,13 +109,13 @@ motor_goals = executed_babbling_data["act_array"]
 num_samples = observed_positions_during_babbling.shape[0]
 TIME_INTERVAL_BLOCKS = [(400, 900)]
 TEST_CLOSED_LOOP_WITHOUT_ADAPTATION = False
-USE_CEREBELLUM = True
-CEREBELLUM_METHOD = "rnn-uoro"
+USE_ADAPTIVE_MODEL = True
+ADAPTIVE_METHOD = "rnn-uoro"
 condition = ""
 desired_freq = [20]
-if USE_CEREBELLUM:
+if USE_ADAPTIVE_MODEL:
     file_name = f"spiraling_babbling_{int(desired_freq[0])}_Hz_test_trajectory_v{version}_mvel0.5_seq"
-    file_name = file_name + CEREBELLUM_METHOD + "_cerebellum"
+    file_name = file_name + ADAPTIVE_METHOD + "_adaptive"
 else:
     if TEST_CLOSED_LOOP_WITHOUT_ADAPTATION:
         file_name = f"spiraling_babbling_{int(desired_freq[0])}_Hz_test_trajectory_v{version}_mvel0.5_closed_loop_seq"
@@ -197,7 +197,7 @@ dim_output = len(index_obs_frames) * 3
 
 # Initialize model using OnlineLearningModel
 forward_model = OnlineLearningModel(
-    model_type=CEREBELLUM_METHOD, input_dim=dim_input, output_dim=dim_output
+    model_type=ADAPTIVE_METHOD, input_dim=dim_input, output_dim=dim_output
 )
 fw_model_predictions = []
 fw_model_observations = []
@@ -298,7 +298,7 @@ if __name__ == "__main__":
                     dtype=torch.float32,
                 ).to(device)
 
-                if USE_CEREBELLUM:
+                if USE_ADAPTIVE_MODEL:
                     correction_n = target_position_n + torch.tensor(
                         error_pred_fw, dtype=torch.float32
                     ).to(device)

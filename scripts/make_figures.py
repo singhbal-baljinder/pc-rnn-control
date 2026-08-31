@@ -298,7 +298,7 @@ def collect_comprehensive_data(force_recompute=False, use_weighted_error=False):
                         elif m == "open_loop":
                             fname = f"{d_name}_open_loop_seq{i}{cfg['cond']}.npz"
                         else:
-                            fname = f"{d_name}_seq{_method_stem(m)}_cerebellum{i}{cfg['cond']}.npz"
+                            fname = f"{d_name}_seq{_method_stem(m)}_adaptive{i}{cfg['cond']}.npz"
                         p = os.path.join(folder, fname)
                         if not os.path.exists(p):
                             continue
@@ -1228,7 +1228,7 @@ def _load_pos_for_method(m, d_name, cfg, folder):
     elif m == "open_loop":
         fname = f"{d_name}_open_loop_seq{i}{cfg['cond']}.npz"
     else:
-        fname = f"{d_name}_seq{_method_stem(m)}_cerebellum{i}{cfg['cond']}.npz"
+        fname = f"{d_name}_seq{_method_stem(m)}_adaptive{i}{cfg['cond']}.npz"
     p = os.path.join(folder, fname)
     return transform(np.load(p, allow_pickle=True)) if os.path.exists(p) else None
 
