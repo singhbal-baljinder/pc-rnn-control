@@ -1,0 +1,20 @@
+# Everything needed to regenerate every figure and table in the paper, and to
+# re-run the open-loop study. Versions are floors, not pins, except where a
+# ceiling is load-bearing (noted inline).
+numpy>=1.26
+scipy>=1.11,<2          # methods/rnn/utils.py uses scipy.ndimage.filters, gone in SciPy 2
+matplotlib>=3.8
+pandas>=2.0
+tqdm>=4.66
+torch>=2.2
+
+# Optional. make_figures.py guards its import and skips the
+# multiple-comparison correction if it is absent.
+# statsmodels>=0.14
+
+# Robot experiments only -- not needed for the figures or the open-loop study.
+# pip install -e ".[robot]"   (pyserial, dynamixel-sdk)
+# The OptiTrack client ships inside the package as pc_rnn_control.mocap.
+
+# The LWPR baseline additionally needs `pylwpr`, a C++ extension that is not on
+# PyPI. See NOTICE. Without it every other method still runs.

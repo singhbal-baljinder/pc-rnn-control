@@ -1,0 +1,53 @@
+This release bundles third-party code. Each component keeps its own license and
+its original author attribution; the BSD-3 LICENSE at the root covers only the
+parts written by the authors of this paper.
+
+--------------------------------------------------------------------------------
+src/pc_rnn_control/methods/rnn/    -- MIT License, see that directory's LICENSE
+--------------------------------------------------------------------------------
+Online RNN learning algorithms (RTRL, UORO, KF-RTRL, Reverse-KF-RTRL, RFLO, DNI,
+KeRNL, Efficient-BPTT, Future-BPTT) from the `vanilla-rtrl` codebase by
+Owen Marschall (the `@author: omarschall` file headers are his), accompanying:
+
+    O. Marschall, K. Cho, C. Savin, "A Unified Framework of Online Learning
+    Algorithms for Training Recurrent Neural Networks", JMLR 21(135), 2020.
+
+Every RNN baseline reported in the paper runs on this code. The files were
+renamed into this package's layout; their contents and headers are unchanged.
+
+--------------------------------------------------------------------------------
+src/pc_rnn_control/methods/gp/log_gp.py  -- BSD License, see that directory
+--------------------------------------------------------------------------------
+Locally Growing Gaussian Process implementation.
+    Copyright (c) by Alejandro Ordonez Conejo. Last modified: Armin Lederer, 02/2022.
+The original copyright header is retained in the file. Provides the LoG-GP
+baseline, accompanying:
+
+    A. Lederer et al., "Gaussian Process-Based Real-Time Learning for Safety
+    Critical Applications", ICML 2021.
+
+--------------------------------------------------------------------------------
+src/pc_rnn_control/mocap/          -- Apache License 2.0, see that directory
+--------------------------------------------------------------------------------
+NatNet SDK Python client, Copyright (c) 2018, 2021 NaturalPoint Inc.
+Used only to stream OptiTrack motion-capture data during robot experiments;
+none of the offline analysis or figure code touches it.
+
+--------------------------------------------------------------------------------
+LWPR (optional, NOT bundled)                                              LGPL
+--------------------------------------------------------------------------------
+The LWPR baseline calls `pylwpr`, a Python binding over the LWPR C++ library by
+S. Vijayakumar and S. Klanke (University of Edinburgh), distributed under the
+LGPL with linking exceptions. It is not redistributed here; build it from the
+upstream Edinburgh distribution to reproduce the LWPR rows. Every other method
+runs without it. See:
+
+    S. Vijayakumar, A. D'Souza, S. Schaal, "Incremental Online Learning in High
+    Dimensions", Neural Computation 17(12), 2005.
+
+--------------------------------------------------------------------------------
+Algorithms reimplemented here (no third-party code)
+--------------------------------------------------------------------------------
+methods/cerebnet.py follows Kalidindi et al. (2019). It is an independent
+implementation from the published description and carries this release's BSD-3
+license.

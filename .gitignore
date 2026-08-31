@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Figure output lands in the working directory, tables in tables/.
+F*.pdf
+tables/
+significance_numbers.tex
+timing_table.tex
+ranking_table.tex

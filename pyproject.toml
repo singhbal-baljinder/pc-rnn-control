@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pc-rnn-control"
+version = "1.0.0"
+description = "Predictive-coding RNN online learning for closed-loop control of a cable-driven soft arm"
+readme = "README.md"
+requires-python = ">=3.11,<3.15"
+license = { file = "LICENSE" }
+authors = [{ name = "Anonymous Authors" }]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: POSIX :: Linux",
+]
+dependencies = [
+    "numpy>=1.26",
+    "scipy>=1.11,<2",   # methods.rnn.utils uses scipy.ndimage.filters, gone in SciPy 2
+    "matplotlib>=3.8",
+    "pandas>=2.0",
+    "tqdm>=4.66",
+    "torch>=2.2",
+]
+
+[project.optional-dependencies]
+# Hardware. Needed to run the robot, never to reproduce a figure.
+robot = ["pyserial>=3.5", "dynamixel-sdk>=3.7"]
+# make_figures.py guards this import and skips the multiple-comparison
+# correction without it.
+stats = ["statsmodels>=0.14"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"pc_rnn_control.methods.rnn" = ["LICENSE"]
+"pc_rnn_control.methods.gp" = ["LICENSE"]
+"pc_rnn_control.mocap" = ["LICENSE"]
