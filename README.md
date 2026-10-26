@@ -1,8 +1,9 @@
 # Online Predictive Coding for Adaptive Shape Control of Soft Robots
 
-Code and data for the paper. All experiments ran on a physical cable-driven soft
-arm; the recordings are included, so every figure and table can be regenerated
-without hardware.
+Code and data for the paper, accepted in *IEEE Robotics and Automation Letters*
+([open-access version on HAL](https://hal.science/hal-05839145)). All experiments
+ran on a physical cable-driven soft arm; the recordings are included, so every
+figure and table can be regenerated without hardware.
 
 ## Install
 

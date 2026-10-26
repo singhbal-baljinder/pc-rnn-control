@@ -18,3 +18,21 @@ authors:
     family-names: Cañamero
   - given-names: Cecilia
     family-names: Laschi
+preferred-citation:
+  type: article
+  title: "Online Predictive Coding for Adaptive Shape Control of Soft Robots"
+  journal: "IEEE Robotics and Automation Letters"
+  url: "https://hal.science/hal-05839145"
+  authors:
+    - given-names: Baljinder
+      family-names: Singh Bal
+    - given-names: Muhammad Sunny
+      family-names: Nazeer
+    - given-names: Alexandre
+      family-names: Pitti
+    - given-names: Laura
+      family-names: Cohen
+    - given-names: Lola
+      family-names: Cañamero
+    - given-names: Cecilia
+      family-names: Laschi
