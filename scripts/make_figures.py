@@ -672,13 +672,13 @@ def _pred_metric_cols(df=None):
             return (
                 "Pred_Mag_Std",
                 "Pred_Mag_RMSE",
-                "Predicted-error magnitude std (mm)",
+                "Predicted-error magnitude\nstandard deviation (mm)",
                 "Predicted-error magnitude (mm)",
             )
     return (
         "Smoothness_Pred",
         "Pred_RMSE",
-        "Open-loop prediction-error std (mm)",
+        "Open-loop prediction-error\nstandard deviation (mm)",
         "Prediction RMSE (mm)",
     )
 
@@ -694,7 +694,7 @@ def _pred_metric_cols(df=None):
 # ── Fig. 3: closed-loop 2x2 ───────────────────────────────────────────────
 def fig_closed_loop_grid(df, path="F_closed_loop_2x2.pdf", tau=10.0, tau_max_q=0.99):
     """Fig. 3:
-      (a) prediction-error variance vs. gain   (b) cumulative error distribution
+      (a) prediction-error std. deviation vs. gain   (b) cumulative error distribution
       (c) mean tracking error along the body    (d) per-segment significance map
     Height: GRID_FIG_H."""
     from matplotlib.lines import Line2D
@@ -775,7 +775,7 @@ def fig_closed_loop_grid(df, path="F_closed_loop_2x2.pdf", tau=10.0, tau_max_q=0
     axa.set_ylabel(ylab, fontsize=8.5)
     axa.tick_params(axis="both", labelsize=8)
     axa.set_title(
-        "(a)  Prediction error variance vs. gain", fontsize=9, fontweight="bold", pad=6
+        "(a)  Prediction-error standard deviation vs. gain", fontsize=9, fontweight="bold", pad=6
     )
 
     # ===== (b) cumulative error distribution ================================
@@ -984,6 +984,9 @@ def fig_closed_loop_grid(df, path="F_closed_loop_2x2.pdf", tau=10.0, tau_max_q=0
         vlo, vhi = 0.0, 1.0
     im = axd.imshow(disp, cmap=plt.cm.viridis, vmin=vlo, vmax=vhi, aspect="auto")
 
+    def _r2(v):
+        return f"{v:.2f}".replace("0.", ".")
+
     def _txtcol(v, sig):
         if not sig:
             return "#222222"
@@ -1019,17 +1022,17 @@ def fig_closed_loop_grid(df, path="F_closed_loop_2x2.pdf", tau=10.0, tau_max_q=0
                 _stars(p_show, sig),
                 ha="center",
                 va="center",
-                fontsize=8,
+                fontsize=10,
                 fontweight="bold",
                 color=tc,
             )
             axd.text(
                 c,
                 r + 0.28,
-                f"[{CIL[r,c]:.2f}, {CIH[r,c]:.2f}]",
+                f"[{_r2(CIL[r,c])},{_r2(CIH[r,c])}]",
                 ha="center",
                 va="center",
-                fontsize=5.0,
+                fontsize=6.2,
                 color=tc,
             )
     axd.set_xticks(np.arange(-0.5, 5), minor=True)
@@ -1047,18 +1050,18 @@ def fig_closed_loop_grid(df, path="F_closed_loop_2x2.pdf", tau=10.0, tau_max_q=0
         "(d)  Per-segment significance vs. PC-RNN-I (N=5)",
         fontsize=9,
         fontweight="bold",
-        pad=20,
+        pad=23,
     )
     axd.text(
         0.5,
         1.015,
         rf"Wilcoxon signed-rank, Holm-corrected ($n{{=}}{n_blocks}$ blocks)" + "\n"
         r"$^{***}p<0.001$  $^{**}p<0.01$  $^{*}p<0.05$   $\cdot$   "
-        r"$\mathrm{ns}$ = n.s.   $\cdot$   [ ] = 95\% CI on $r$",
+        r"$\mathrm{ns}$ = n.s.   $\cdot$   [ ] = 95% CI on $r$",
         transform=axd.transAxes,
         ha="center",
         va="bottom",
-        fontsize=6.0,
+        fontsize=6.8,
         color="#333333",
         style="italic",
     )
