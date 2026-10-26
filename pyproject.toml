@@ -9,7 +9,14 @@ description = "Predictive-coding RNN online learning for closed-loop control of 
 readme = "README.md"
 requires-python = ">=3.11,<3.15"
 license = { file = "LICENSE" }
-authors = [{ name = "Anonymous Authors" }]
+authors = [
+    { name = "Baljinder Singh Bal" },
+    { name = "Muhammad Sunny Nazeer" },
+    { name = "Alexandre Pitti" },
+    { name = "Laura Cohen" },
+    { name = "Lola Cañamero" },
+    { name = "Cecilia Laschi" },
+]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: POSIX :: Linux",

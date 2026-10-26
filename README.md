@@ -1,4 +1,4 @@
-# Adaptive internal model for soft robot shape control
+# Online Predictive Coding for Adaptive Shape Control of Soft Robots
 
 Code and data for the paper's two experiments on a cable-driven soft arm
 (`docs/paper.pdf`):
@@ -98,6 +98,11 @@ the `.tex` table fragments in `tables/`.
 | Table II | `tables/openloop_full_table.tex` | `make_openloop_full_table` |
 | Table III | `tables/open_closed_table.tex` | `make_open_closed_table` |
 | Table IV | `timing_table.tex` | `make_timing_table` |
+
+Every [GitHub release](https://github.com/singhbal-baljinder/pc-rnn-control/releases)
+attaches these six files, regenerated from the tagged commit by
+`.github/workflows/release.yml`, so you can check them against the paper without
+installing anything.
 
 Closed-loop metrics come from a precomputed DataFrame, `data/closed_loop_cache.pkl`.
 **Delete it to recompute everything from the raw recordings** — the `.npz` and

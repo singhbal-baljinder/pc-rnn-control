@@ -1,0 +1,98 @@
+# Rebuilds every figure and table in the paper from the committed data on a
+# clean runner, and publishes them with the paper as a GitHub release.
+#
+# Manual only: Actions -> Release -> Run workflow, giving the tag. Nothing runs
+# on push. The release is created as a draft by default so it can be checked
+# before it goes public; GitHub creates the tag when the draft is published.
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to release, e.g. v1.0.0 (must equal v + pyproject.toml version)"
+        required: true
+      draft:
+        description: "Create as a draft"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      TAG: ${{ inputs.tag }}
+      DRAFT: ${{ inputs.draft }}
+    steps:
+      - uses: actions/checkout@v7
+
+      # A tag that disagrees with the package version would publish a release
+      # whose `pip show` says something else.
+      - name: Check tag against pyproject.toml
+        run: |
+          version=$(python3 -c 'import tomllib; print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])')
+          [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::tag '$TAG' is not vX.Y.Z"; exit 1; }
+          [[ "$TAG" == "v$version" ]] || { echo "::error::tag $TAG but pyproject.toml says $version"; exit 1; }
+          if gh release view "$TAG" >/dev/null 2>&1; then echo "::error::release $TAG already exists"; exit 1; fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      # --locked: fail rather than silently re-solve if pixi.lock is stale.
+      - uses: prefix-dev/setup-pixi@v0.11.2
+        with:
+          pixi-version: v0.72.2
+          locked: true
+
+      # Not needed for the figures, but the README promises it builds, so a
+      # release that cannot build it should not go out.
+      - name: Build LWPR baseline
+        run: pixi run build-lwpr && pixi run verify
+
+      - name: Generate figures and tables
+        run: pixi run figures
+
+      - name: Bundle
+        run: |
+          out="pc-rnn-control-$TAG-figures-tables"
+          mkdir -p "$out/figures" "$out/tables"
+          cp F_closed_loop_2x2.pdf F_tracking_timeseries_v21_10Hz.pdf "$out/figures/"
+          cp ranking_table.tex timing_table.tex tables/openloop_full_table.tex \
+             tables/open_closed_table.tex "$out/tables/"
+          cp docs/paper.pdf "$out/"
+          zip -qr "$out.zip" "$out"
+          echo "BUNDLE=$out.zip" >> "$GITHUB_ENV"
+
+      - name: Write release notes
+        run: |
+          cat > notes.md <<EOF
+          Code and data for *Online Predictive Coding for Adaptive Shape Control of Soft Robots*.
+
+          \`$(basename "$BUNDLE")\` holds every figure and table in the paper, regenerated from
+          this tag's committed data on a clean runner, plus the paper itself.
+
+          To reproduce locally:
+
+          \`\`\`bash
+          pixi install
+          pixi run build-lwpr   # optional, for the LWPR baseline
+          pixi run figures
+          \`\`\`
+
+          See \`README.md\` for details and \`CITATION.cff\` to cite.
+          EOF
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          flags=()
+          [[ "$DRAFT" == "true" ]] && flags+=(--draft)
+          gh release create "$TAG" "$BUNDLE" docs/paper.pdf \
+            --target "$GITHUB_SHA" \
+            --title "$TAG" \
+            --notes-file notes.md \
+            "${flags[@]}"
