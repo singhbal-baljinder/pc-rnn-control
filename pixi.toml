@@ -22,7 +22,7 @@ torch = { version = ">=2.2", index = "https://download.pytorch.org/whl/cpu" }
 build-lwpr = """
 mkdir -p third_party/lwpr/build &&
 cd third_party/lwpr/build &&
-cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DNUM_THREADS=1 &&
+cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_PREFIX_PATH=$CONDA_PREFIX -DNUM_THREADS=1 &&
 make -j &&
 make install &&
 python -c 'import pylwpr; print("pylwpr OK:", pylwpr.LWPR(2, 1))'
