@@ -77,7 +77,19 @@ Closed-loop files are named
 where the suffix is empty for the reference, `_closed_loop_seq0` for NCL-C,
 `_open_loop_seq0` for OL-C, and `_seq{method}_adaptive{idx_trial}` for a learner.
 
+## Citation
+
+```bibtex
+@article{singhbal_online_predictive_coding,
+  title   = {Online Predictive Coding for Adaptive Shape Control of Soft Robots},
+  author  = {Singh Bal, Baljinder and Nazeer, Muhammad Sunny and Pitti, Alexandre and
+             Cohen, Laura and Ca{\~n}amero, Lola and Laschi, Cecilia},
+  journal = {IEEE Robotics and Automation Letters},
+  url     = {https://hal.science/hal-05839145}
+}
+```
+
 ## License
 
 BSD-3-Clause (`LICENSE`). Third-party components keep their own licenses: see
-`NOTICE`. To cite, see `CITATION.cff`.
+`NOTICE`.

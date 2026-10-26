@@ -81,7 +81,7 @@ jobs:
           pixi run figures
           \`\`\`
 
-          See \`README.md\` for details and \`CITATION.cff\` to cite.
+          See \`README.md\` for details and how to cite.
           EOF
 
       - name: Publish release
