@@ -58,7 +58,7 @@ def load_robot_data(robot_name: str,
                     n_samples:  Optional[int] = 10_000,
                     freq:       float = 40.0) -> RobotDataset:
     """
-    Mirrors the loading strategy in the original comparison script.
+    Load a recorded babbling or test trajectory as a RobotDataset.
 
     Args:
         robot_name : 'spiraling_robot'

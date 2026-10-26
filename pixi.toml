@@ -1,14 +1,4 @@
-# Reproducible environment for the whole artifact, including the C toolchain.
-#
-# `pip install -e .` covers the Python side, but the LWPR baseline is a C
-# library that has to be compiled, and pip cannot express "I need cmake, a C
-# compiler and expat". pixi can, and it locks them, so `pixi install` puts every
-# reviewer on the same footing.
-#
-#   pixi install          # environment + lockfile
-#   pixi run build-lwpr   # compile the LWPR baseline into this environment
-#   pixi run figures      # every figure and table in the paper
-#   pixi run verify       # the full check suite
+# pixi install && pixi run build-lwpr && pixi run figures
 [workspace]
 name = "pc-rnn-control"
 channels = ["conda-forge"]
@@ -16,7 +6,7 @@ platforms = ["linux-64"]
 
 [dependencies]
 python = ">=3.11,<3.15"
-# The LWPR build. `c-compiler` is conda-forge's portable compiler metapackage.
+# toolchain for the LWPR baseline
 cmake = "*"
 make = "*"
 c-compiler = "*"
@@ -24,11 +14,8 @@ cxx-compiler = "*"
 expat = "*"
 
 [pypi-dependencies]
-# The package itself, editable. Its runtime dependencies stay declared once, in
-# pyproject.toml, rather than being restated here and drifting.
 pc-rnn-control = { path = ".", editable = true }
-# CPU-only PyTorch. PyPI's default Linux wheel drags in ~4.5 GB of CUDA that
-# nothing here uses: the policy runs on CPU and the figures read cached results.
+# CPU build: nothing here needs CUDA
 torch = { version = ">=2.2", index = "https://download.pytorch.org/whl/cpu" }
 
 [tasks]

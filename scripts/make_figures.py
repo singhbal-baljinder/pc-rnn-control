@@ -63,7 +63,7 @@ F1_PRED_METRIC = "residual"  # "residual": RMSE(pred-obs) and its std -- the SAM
 #   want the predicted-error magnitude instead.
 
 # ═════════════════════════════════════════════════════════════════════════
-# CONSTANTS  ──  copied verbatim from make_figures.py
+# CONSTANTS
 # ═════════════════════════════════════════════════════════════════════════
 INDEX_OBS_FRAMES = [1, 3, 5, 7]
 INDICES_OBS_POS = [i for k in INDEX_OBS_FRAMES for i in range(3 * k, 3 * k + 3)]
@@ -143,7 +143,7 @@ _SHORT = {
 
 
 # ═════════════════════════════════════════════════════════════════════════
-# HELPERS + LOADER  ──  copied verbatim from make_figures.py
+# HELPERS + LOADER
 # ═════════════════════════════════════════════════════════════════════════
 def _method_stem(m):
     return METHOD_FILENAME.get(m, m)
@@ -691,18 +691,12 @@ def _pred_metric_cols(df=None):
 # ── F3 ───────────────────────────────────────────────────────────────────
 
 
-# ── Combined main-results figure (F1 families + F3) ───────────────────────
-
-
-# ── Merged 2x2 closed-loop figure (fig_main_pair + fig_persegment) ────────
+# ── Fig. 3: closed-loop 2x2 ───────────────────────────────────────────────
 def fig_closed_loop_grid(df, path="F_closed_loop_2x2.pdf", tau=10.0, tau_max_q=0.99):
-    """Single 2x2 figure merging the two closed-loop figures (does NOT replace
-    them -- fig_main_pair and fig_persegment are left intact):
+    """Fig. 3:
       (a) prediction-error variance vs. gain   (b) cumulative error distribution
       (c) mean tracking error along the body    (d) per-segment significance map
-    All panel/stat logic mirrors the two source functions. Height knob: GRID_FIG_H.
-    The (d) star/CI key is a one-line footnote here; you may instead move it to
-    the LaTeX caption (RAL-idiomatic) and delete the fig.text line below."""
+    Height: GRID_FIG_H."""
     from matplotlib.lines import Line2D
 
     ycol, ccol, ylab, clab = _pred_metric_cols(df)
@@ -1084,9 +1078,6 @@ def fig_closed_loop_grid(df, path="F_closed_loop_2x2.pdf", tau=10.0, tau_max_q=0
 
 
 
-# ── Per-cell significance numbers (effect size r, p, power) ──────────────
-
-
 # ── Per-step computation-time table (Avg / Max of the PU step) ────────────
 # Machine the timings were taken on, and what they do/don't cover. NOT caption
 # padding: absolute milliseconds cannot be read without the CPU they were
@@ -1095,23 +1086,10 @@ def fig_closed_loop_grid(df, path="F_closed_loop_2x2.pdf", tau=10.0, tau_max_q=0
 # about the rig, not about the data -- edit it when the rig changes. Set either
 # to "" to drop that clause.
 TIMING_HARDWARE = (
-    # Kept terse: this caption sits in a single column of an 8-page RA-L
-    # submission with zero slack, and the longer wording cost a whole page.
     r"an Intel Core i7-11800H, non-real-time Ubuntu kernel, single Python process"
 )
-# R8.9 asked Table IV to report numeric precision and memory alongside the
-# hardware. Both are configuration facts, not run outputs, so they live here with
-# the rest of the caption text. Precision: no torch.set_default_dtype anywhere in
-# predictive_dyn_models, so PC-RNN-I and the LSTM policy run at torch's float32
-# default; every NumPy-based learner (LWPR, LoG-GP, CerebNet, the [21] family) is
-# float64. Memory: summed nbytes/element_size over each learner's arrays and
-# tensors right after OnlineLearningModel(model_type=m, input_dim=3,
-# output_dim=12) -- the closed-loop constructor call, which passes no kwargs, so
-# these are the sizes actually used. Measured: LWPR 0.09, CerebNet 0.18, UORO
-# 0.18, PC-RNN-I 0.85, LoG-GP 98.3 MB. LoG-GP is the outlier because its
-# constructor pre-allocates K as [pts*outs, pts*N] = [1200, 10000] float64 = 96 MB
-# regardless of how many points arrive; the others grow with the data. Hence
-# "at start-up": LWPR in particular allocates receptive fields online.
+# Numeric precision and model memory at start-up (LoG-GP pre-allocates its
+# kernel matrix; the other learners grow with the data).
 TIMING_ENVIRONMENT = (
     r"float32 (PC-RNN-I, policy), float64 elsewhere; start-up model state "
     r"$<$1\,MB except LoG-GP (98\,MB, pre-allocated)"
@@ -1175,7 +1153,7 @@ def make_timing_table(df, path="timing_table.tex", budget_ms=50.0):
     # rates actually present rather than asserted: the caption should only claim
     # the table is scored against the strictest deadline if it is.
     _b = sorted({float(v) for v in df.get("Budget_ms", pd.Series(dtype=float)).dropna()})
-    _strictest = ""  # dropped: costs a line in the 8-page RA-L layout
+    _strictest = ""
 
     L = [
         r"\begin{table}[t]",
@@ -1213,20 +1191,8 @@ def make_timing_table(df, path="timing_table.tex", budget_ms=50.0):
 
 
 # ═════════════════════════════════════════════════════════════════════════
-# Actuation & tracking timeseries (ported from make_figures.py)
-# TRANSPOSED variant of the original 2x2 plot_actuation_and_tracking: rows are
-# the signal (motor command, configuration-space coordinate) and columns the
-# condition, instead of the other way round. Logic, options and values are
-# identical to the source -- only the axes layout differs.
-#
-# The transpose is what buys the page space. With rows = condition no axis can
-# be shared (a row spans rad AND mm), so every panel needs its own ticks, title
-# and legend. With rows = signal, each row is ONE quantity in ONE unit across
-# the conditions, so sharey="row" is meaningful and sharex is exact (all panels
-# are the same trajectory at the same rate). Dropping the duplicated tick
-# labels, the four titles and three of the four legends takes the figure from
-# 7.1x6.0 in to COL_2 x TRACK_FIG_H with nothing removed -- and a shared y makes
-# the Nominal/Fault comparison quantitative rather than eyeballed.
+# Fig. 4: actuation and tracking timeseries. Rows are signals (motor command,
+# configuration coordinate), columns are conditions, so each row shares its y-axis.
 # ═════════════════════════════════════════════════════════════════════════
 def _normalise_methods(methods):
     if methods is None:
@@ -2698,8 +2664,7 @@ def make_ranking_table(df, path="ranking_table.tex", methods=None, ref=REF_METHO
       - Median gain (%)   : typical tracking-error reduction vs NCL-C per test
       - [min, max] (%)    : best- and worst-case gain across the tests
       - Best (k/N)        : on how many tests the method had the highest gain
-    (The paired Delta-vs-PC and Wilcoxon p are intentionally omitted; report
-    those in the text/appendix if a reviewer wants the significance.) By default
+    By default
     the table includes the non-PC baselines plus EVERY PC-RNN-I variant in `df`."""
     if methods is None:
 
