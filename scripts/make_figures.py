@@ -531,6 +531,14 @@ TRACK_LEGEND_RIGHT_FRAC = 0.17
 # Bounded below by panel (a)'s colorbar+label (top gap) and panel (d)'s method
 # tick labels (bottom gap), so do not go too tight.
 GRID_WSPACE = 0.38
+# Fig. 3 bottom row: width of panel (d) relative to (c), and height of the bottom
+# row relative to the top. (d) is a 9x5 grid of annotated cells, so it gets the
+# room; the figure's total size is unchanged.
+GRID_D_WIDTH = 1.6
+GRID_BOTTOM_H = 1.25
+# Panel (d) cell text: significance stars and the 95% CI on r.
+GRID_D_STAR_FS = 11
+GRID_D_CI_FS = 7.2
 
 
 def set_style():
@@ -702,13 +710,13 @@ def fig_closed_loop_grid(df, path="F_closed_loop_2x2.pdf", tau=10.0, tau_max_q=0
     ycol, ccol, ylab, clab = _pred_metric_cols(df)
 
     fig = plt.figure(figsize=(COL_2, GRID_FIG_H))
-    gs = fig.add_gridspec(
-        2, 2, width_ratios=[1, 1], height_ratios=[1, 1], wspace=GRID_WSPACE, hspace=0.42
-    )
-    axa = fig.add_subplot(gs[0, 0])
-    axb = fig.add_subplot(gs[0, 1])
-    axc = fig.add_subplot(gs[1, 0])
-    axd = fig.add_subplot(gs[1, 1])
+    gs = fig.add_gridspec(2, 1, height_ratios=[1, GRID_BOTTOM_H], hspace=0.42)
+    top = gs[0].subgridspec(1, 2, wspace=GRID_WSPACE)
+    bot = gs[1].subgridspec(1, 2, width_ratios=[1, GRID_D_WIDTH], wspace=GRID_WSPACE)
+    axa = fig.add_subplot(top[0, 0])
+    axb = fig.add_subplot(top[0, 1])
+    axc = fig.add_subplot(bot[0, 0])
+    axd = fig.add_subplot(bot[0, 1])
 
     # ===== (a) trade-off landscape ==========================================
     learn = df[~df["Method"].isin(["baseline", "open_loop"])].dropna(subset=[ycol])
@@ -773,6 +781,7 @@ def fig_closed_loop_grid(df, path="F_closed_loop_2x2.pdf", tau=10.0, tau_max_q=0
             cb.ax.yaxis.set_label_coords(2.4, 0.5)
     axa.set_xlabel("Closed-loop error-reduction gain (%)", fontsize=8.5)
     axa.set_ylabel(ylab, fontsize=8.5)
+    axa.yaxis.set_major_locator(mpl.ticker.MaxNLocator(integer=True))
     axa.tick_params(axis="both", labelsize=8)
     axa.set_title(
         "(a)  Prediction-error standard deviation vs. gain", fontsize=9, fontweight="bold", pad=6
@@ -1007,9 +1016,9 @@ def fig_closed_loop_grid(df, path="F_closed_loop_2x2.pdf", tau=10.0, tau_max_q=0
                     )
                 )
     axd.set_xticks(range(5))
-    axd.set_xticklabels(seg_cols, fontsize=7.5)
+    axd.set_xticklabels(seg_cols, fontsize=8)
     axd.set_yticks(range(len(rows_d)))
-    axd.set_yticklabels([_leg_short(m) for m in rows_d], fontsize=6.8)
+    axd.set_yticklabels([_leg_short(m) for m in rows_d], fontsize=7.5)
     axd.axvline(3.5, color="k", lw=1.0)
     for r in range(len(rows_d)):
         for c in range(5):
@@ -1022,17 +1031,17 @@ def fig_closed_loop_grid(df, path="F_closed_loop_2x2.pdf", tau=10.0, tau_max_q=0
                 _stars(p_show, sig),
                 ha="center",
                 va="center",
-                fontsize=10,
+                fontsize=GRID_D_STAR_FS,
                 fontweight="bold",
                 color=tc,
             )
             axd.text(
                 c,
                 r + 0.28,
-                f"[{_r2(CIL[r,c])},{_r2(CIH[r,c])}]",
+                f"[{_r2(CIL[r,c])}, {_r2(CIH[r,c])}]",
                 ha="center",
                 va="center",
-                fontsize=6.2,
+                fontsize=GRID_D_CI_FS,
                 color=tc,
             )
     axd.set_xticks(np.arange(-0.5, 5), minor=True)
@@ -1061,7 +1070,7 @@ def fig_closed_loop_grid(df, path="F_closed_loop_2x2.pdf", tau=10.0, tau_max_q=0
         transform=axd.transAxes,
         ha="center",
         va="bottom",
-        fontsize=6.8,
+        fontsize=7.2,
         color="#333333",
         style="italic",
     )
