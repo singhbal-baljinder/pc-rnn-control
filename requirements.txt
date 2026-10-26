@@ -16,5 +16,7 @@ torch>=2.2
 # pip install -e ".[robot]"   (pyserial, dynamixel-sdk)
 # The OptiTrack client ships inside the package as pc_rnn_control.mocap.
 
-# The LWPR baseline additionally needs `pylwpr`, a C++ extension that is not on
-# PyPI. See NOTICE. Without it every other method still runs.
+# The LWPR baseline needs `pylwpr`, built from the C sources bundled at
+# third_party/lwpr/ -- pip cannot express a C toolchain, so use `pixi install`
+# then `pixi run build-lwpr`, or follow the manual cmake steps in the README.
+# Without it every other method still runs.

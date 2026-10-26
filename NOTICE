@@ -34,16 +34,62 @@ Used only to stream OptiTrack motion-capture data during robot experiments;
 none of the offline analysis or figure code touches it.
 
 --------------------------------------------------------------------------------
-LWPR (optional, NOT bundled)                                              LGPL
+third_party/lwpr/          -- LGPL-2.1-or-later WITH exceptions, see its COPYING
 --------------------------------------------------------------------------------
-The LWPR baseline calls `pylwpr`, a Python binding over the LWPR C++ library by
-S. Vijayakumar and S. Klanke (University of Edinburgh), distributed under the
-LGPL with linking exceptions. It is not redistributed here; build it from the
-upstream Edinburgh distribution to reproduce the LWPR rows. Every other method
-runs without it. See:
+LWPR (Locally Weighted Projection Regression), version 1.2.6.
+    Copyright (C) 2007  Stefan Klanke, Sethu Vijayakumar
+    Contact: sethu.vijayakumar@ed.ac.uk
 
-    S. Vijayakumar, A. D'Souza, S. Schaal, "Incremental Online Learning in High
-    Dimensions", Neural Computation 17(12), 2005.
+Licensed under the GNU Lesser General Public License, version 2.1 or later,
+with the static-linking and attribution exceptions stated in the accompanying
+third_party/lwpr/COPYING. That file is reproduced verbatim, and the per-file
+copyright headers in the C sources are unmodified.
+
+The root BSD-3 LICENSE of this release does NOT cover third_party/lwpr/.
+
+As the authors request (COPYING, exception 3):
+
+    This program is based in part on the LWPR library as developed
+    by the Statistical Machine Learning and Motor Control Group,
+    School of Informatics, University of Edinburgh
+    (http://www.ipab.inf.ed.ac.uk/slmc/software/lwpr)
+
+Please cite:
+
+    S. Vijayakumar, A. D'Souza and S. Schaal, "Incremental Online Learning in
+    High Dimensions", Neural Computation 17(12):2602-2634, 2005.
+
+STATEMENT OF CHANGES (LGPL-2.1 section 2a). This is a REDUCED SUBSET of upstream
+1.2.6, obtained via the CMake-based fork at https://github.com/lhlmgr/lwpr. The
+complete original is available from the Edinburgh URL above. Changes:
+
+  * python/lwprmodule.c: the module init symbol was renamed from PyInit_lwpr to
+    PyInit_pylwpr, so the extension imports as `pylwpr`. Marked in the file.
+    No algorithmic change; every other source file is byte-identical to upstream.
+  * CMakeLists.txt: build-script modifications (which COPYING exception 1
+    states do not constitute a derivative work) -- the Python module is built by
+    default, a target referencing an example directory the fork had already
+    deleted was removed, Eigen was demoted from a hard requirement, and the
+    install location of the Python module was made overridable.
+  * README.TXT: the middle section, which described directories and build steps
+    that do not exist in this subset, was rewritten and marked as ours. The
+    upstream copyright, contact and warranty notices are untouched.
+  * Removed relative to upstream: the MATLAB bindings, the autotools build
+    files, the Python-2 setup scripts, the compiled documentation PDF, one
+    example, and two files that carried no license grant at all.
+
+Building it is optional: without it the LWPR baseline is skipped and every other
+method still runs. See the README.
+
+--------------------------------------------------------------------------------
+third_party/lwpr/cmake/FindEigen3.cmake   -- 2-clause BSD
+--------------------------------------------------------------------------------
+    Copyright (c) 2006, 2007 Montel Laurent, <montel@kde.org>
+    Copyright (c) 2008, 2009 Gael Guennebaud, <g.gael@free.fr>
+    Copyright (c) 2009 Benoit Jacob <jacob.benoit.1@gmail.com>
+Redistribution and use is allowed according to the terms of the 2-clause BSD
+license. Retained for CMake compatibility; Eigen itself is not required to build
+the LWPR Python module.
 
 --------------------------------------------------------------------------------
 Algorithms reimplemented here (no third-party code)

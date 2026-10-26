@@ -1,4 +1,6 @@
 __pycache__/
+.pixi/
+third_party/lwpr/build/
 *.py[cod]
 *.egg-info/
 .venv/

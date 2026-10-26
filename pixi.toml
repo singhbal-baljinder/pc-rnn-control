@@ -1,0 +1,42 @@
+# Reproducible environment for the whole artifact, including the C toolchain.
+#
+# `pip install -e .` covers the Python side, but the LWPR baseline is a C
+# library that has to be compiled, and pip cannot express "I need cmake, a C
+# compiler and expat". pixi can, and it locks them, so `pixi install` puts every
+# reviewer on the same footing.
+#
+#   pixi install          # environment + lockfile
+#   pixi run build-lwpr   # compile the LWPR baseline into this environment
+#   pixi run figures      # every figure and table in the paper
+#   pixi run verify       # the full check suite
+[workspace]
+name = "pc-rnn-control"
+channels = ["conda-forge"]
+platforms = ["linux-64"]
+
+[dependencies]
+python = ">=3.11,<3.15"
+# The LWPR build. `c-compiler` is conda-forge's portable compiler metapackage.
+cmake = "*"
+make = "*"
+c-compiler = "*"
+cxx-compiler = "*"
+expat = "*"
+
+[pypi-dependencies]
+# The package itself, editable. Its runtime dependencies stay declared once, in
+# pyproject.toml, rather than being restated here and drifting.
+pc-rnn-control = { path = ".", editable = true }
+
+[tasks]
+build-lwpr = """
+mkdir -p third_party/lwpr/build &&
+cd third_party/lwpr/build &&
+cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DNUM_THREADS=1 &&
+make -j &&
+make install &&
+python -c 'import pylwpr; print("pylwpr OK:", pylwpr.LWPR(2, 1))'
+"""
+figures = "python scripts/make_figures.py"
+openloop = "python scripts/run_openloop_sweep.py"
+verify = "python -c 'import pc_rnn_control, pylwpr; print(\"environment complete\")'"

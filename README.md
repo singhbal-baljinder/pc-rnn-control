@@ -29,11 +29,21 @@ src/pc_rnn_control/
   mocap/      OptiTrack streaming (robot runs only)
 scripts/      run_babbling.py  train_policy.py  run_closed_loop.py
               run_openloop_sweep.py  make_figures.py
+third_party/  lwpr/       the LWPR baseline, C sources (LGPL)
 data/         the recorded runs (see Data)
 docs/         the paper
 ```
 
 ## Install
+
+Two ways. **pixi** gives you the whole environment including the C toolchain
+the LWPR baseline needs, pinned by `pixi.lock`:
+
+```bash
+pixi install
+```
+
+Or pip, if you do not need LWPR:
 
 ```bash
 python -m venv .venv && . .venv/bin/activate
@@ -44,8 +54,32 @@ pip install -e ".[robot]"   # additionally: motors and motion capture
 Python 3.11–3.14. Nothing is compiled; `scipy<2` is pinned because the RNN
 algorithms use `scipy.ndimage.filters`, removed in SciPy 2.
 
-One optional piece is **not** bundled: `pylwpr`, a C++ extension (LGPL) backing
-the LWPR baseline. Without it LWPR is skipped and everything else runs.
+### The LWPR baseline
+
+LWPR is a C library, so it has to be compiled. It is bundled at
+`third_party/lwpr/` (LGPL-2.1, see `NOTICE`) and pixi provides the toolchain:
+
+```bash
+pixi install
+pixi run build-lwpr
+```
+
+Or by hand, into whatever environment you are using:
+
+```bash
+cd third_party/lwpr && mkdir -p build && cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DNUM_THREADS=1 && make && make install
+python -c "import pylwpr"
+```
+
+The install prefix matters — the extension links against `liblwpr.so.1`, which
+has to land somewhere the loader will find it. Keep `NUM_THREADS=1`: more than
+one thread changes the order of floating-point summation, and the paper's
+numbers come from the single-threaded build. Note `pip show pylwpr` will never
+find it; it is a `make install` drop, not a pip package.
+
+Building it is optional. Without it the LWPR baseline is skipped and every other
+method runs normally.
 
 ## Reproducing the figures and tables
 
