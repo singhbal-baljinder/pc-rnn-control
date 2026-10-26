@@ -1007,9 +1007,9 @@ def fig_closed_loop_grid(df, path="F_closed_loop_2x2.pdf", tau=10.0, tau_max_q=0
                     )
                 )
     axd.set_xticks(range(5))
-    axd.set_xticklabels(seg_cols, fontsize=7.5)
+    axd.set_xticklabels(seg_cols, fontsize=8.5)
     axd.set_yticks(range(len(rows_d)))
-    axd.set_yticklabels([_leg_short(m) for m in rows_d], fontsize=6.8)
+    axd.set_yticklabels([_leg_short(m) for m in rows_d], fontsize=8)
     axd.axvline(3.5, color="k", lw=1.0)
     for r in range(len(rows_d)):
         for c in range(5):
@@ -1018,7 +1018,7 @@ def fig_closed_loop_grid(df, path="F_closed_loop_2x2.pdf", tau=10.0, tau_max_q=0
             p_show = Padj[r, c] if np.isfinite(Padj[r, c]) else P[r, c]
             axd.text(
                 c,
-                r - 0.14,
+                r - 0.17,
                 _stars(p_show, sig),
                 ha="center",
                 va="center",
@@ -1028,11 +1028,11 @@ def fig_closed_loop_grid(df, path="F_closed_loop_2x2.pdf", tau=10.0, tau_max_q=0
             )
             axd.text(
                 c,
-                r + 0.28,
+                r + 0.29,
                 f"[{_r2(CIL[r,c])},{_r2(CIH[r,c])}]",
                 ha="center",
                 va="center",
-                fontsize=6.2,
+                fontsize=6.0,
                 color=tc,
             )
     axd.set_xticks(np.arange(-0.5, 5), minor=True)
@@ -1042,15 +1042,15 @@ def fig_closed_loop_grid(df, path="F_closed_loop_2x2.pdf", tau=10.0, tau_max_q=0
     axd.tick_params(which="minor", length=0)
     caxd = axd.inset_axes([1.04, 0.0, 0.038, 1.0])
     cbd = fig.colorbar(im, cax=caxd)
-    cbd.set_label("effect size $r$", fontsize=6.6, labelpad=1)
-    cbd.ax.tick_params(labelsize=6)
+    cbd.set_label("effect size $r$", fontsize=7.5, labelpad=1)
+    cbd.ax.tick_params(labelsize=7)
     # panel (d) title + the stats key as a 2-line subtitle of THIS panel
     # (was a figure-level footnote). To drop it instead, delete the axd.text below.
     axd.set_title(
         "(d)  Per-segment significance vs. PC-RNN-I (N=5)",
         fontsize=9,
         fontweight="bold",
-        pad=23,
+        pad=27,
     )
     axd.text(
         0.5,
@@ -1061,7 +1061,7 @@ def fig_closed_loop_grid(df, path="F_closed_loop_2x2.pdf", tau=10.0, tau_max_q=0
         transform=axd.transAxes,
         ha="center",
         va="bottom",
-        fontsize=6.8,
+        fontsize=7.0,
         color="#333333",
         style="italic",
     )
