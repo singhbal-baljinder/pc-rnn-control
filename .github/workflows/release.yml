@@ -1,5 +1,5 @@
 # Rebuilds every figure and table in the paper from the committed data on a
-# clean runner, and publishes them with the paper as a GitHub release.
+# clean runner, and publishes them as a GitHub release.
 #
 # Manual only: Actions -> Release -> Run workflow, giving the tag. Nothing runs
 # on push. The release is created as a draft by default so it can be checked
@@ -62,7 +62,6 @@ jobs:
           cp F_closed_loop_2x2.pdf F_tracking_timeseries_v21_10Hz.pdf "$out/figures/"
           cp ranking_table.tex timing_table.tex tables/openloop_full_table.tex \
              tables/open_closed_table.tex "$out/tables/"
-          cp docs/paper.pdf "$out/"
           zip -qr "$out.zip" "$out"
           echo "BUNDLE=$out.zip" >> "$GITHUB_ENV"
 
@@ -72,7 +71,7 @@ jobs:
           Code and data for *Online Predictive Coding for Adaptive Shape Control of Soft Robots*.
 
           \`$(basename "$BUNDLE")\` holds every figure and table in the paper, regenerated from
-          this tag's committed data on a clean runner, plus the paper itself.
+          this tag's committed data on a clean runner.
 
           To reproduce locally:
 
@@ -91,7 +90,7 @@ jobs:
         run: |
           flags=()
           [[ "$DRAFT" == "true" ]] && flags+=(--draft)
-          gh release create "$TAG" "$BUNDLE" docs/paper.pdf \
+          gh release create "$TAG" "$BUNDLE" \
             --target "$GITHUB_SHA" \
             --title "$TAG" \
             --notes-file notes.md \
