@@ -27,6 +27,9 @@ expat = "*"
 # The package itself, editable. Its runtime dependencies stay declared once, in
 # pyproject.toml, rather than being restated here and drifting.
 pc-rnn-control = { path = ".", editable = true }
+# CPU-only PyTorch. PyPI's default Linux wheel drags in ~4.5 GB of CUDA that
+# nothing here uses: the policy runs on CPU and the figures read cached results.
+torch = { version = ">=2.2", index = "https://download.pytorch.org/whl/cpu" }
 
 [tasks]
 build-lwpr = """
