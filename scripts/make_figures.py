@@ -601,23 +601,19 @@ def _rank_biserial(d):
     return (r[d > 0].sum() - r[d < 0].sum()) / r.sum()
 
 
-def _boot_power(d, B=2000, alpha=0.05, seed=0):
-    """Achieved power: fraction of bootstrap resamples of the REAL paired
-    differences that remain significant. (Resamples the recorded data.)"""
+def _boot_rb_ci(d, B=2000, alpha=0.05, seed=0):
+    """Percentile bootstrap confidence interval on the rank-biserial effect
+    size, resampling the REAL paired differences. (Resamples the recorded data.)"""
     rng = np.random.default_rng(seed)
     d = np.asarray(d)
     n = len(d)
-    hits = 0
-    for _ in range(B):
-        s = d[rng.integers(0, n, n)]
-        if np.ptp(s) == 0:
-            continue
-        try:
-            if scipy_stats.wilcoxon(s, alternative="two-sided").pvalue < alpha:
-                hits += 1
-        except ValueError:
-            pass
-    return hits / B
+    if n == 0:
+        return (float("nan"), float("nan"))
+    rs = np.empty(B)
+    for b in range(B):
+        rs[b] = _rank_biserial(d[rng.integers(0, n, n)])
+    return (float(np.percentile(rs, 100 * alpha / 2)),
+            float(np.percentile(rs, 100 * (1 - alpha / 2))))
 
 
 def _stars(p, sig):
@@ -705,7 +701,7 @@ def fig_closed_loop_grid(df, path="F_closed_loop_2x2.pdf", tau=10.0, tau_max_q=0
       (a) prediction-error variance vs. gain   (b) cumulative error distribution
       (c) mean tracking error along the body    (d) per-segment significance map
     All panel/stat logic mirrors the two source functions. Height knob: GRID_FIG_H.
-    The (d) star/power key is a one-line footnote here; you may instead move it to
+    The (d) star/CI key is a one-line footnote here; you may instead move it to
     the LaTeX caption (RAL-idiomatic) and delete the fig.text line below."""
     from matplotlib.lines import Line2D
 
@@ -901,7 +897,8 @@ def fig_closed_loop_grid(df, path="F_closed_loop_2x2.pdf", tau=10.0, tau_max_q=0
 
     P = np.full((len(rows_d), 5), np.nan)
     ES = np.full_like(P, np.nan)
-    PW = np.full_like(P, np.nan)
+    CIL = np.full_like(P, np.nan)
+    CIH = np.full_like(P, np.nan)
     for r, m in enumerate(rows_d):
         for c in range(5):
             piv = seg_piv[c] if c < 4 else body_piv
@@ -910,7 +907,8 @@ def fig_closed_loop_grid(df, path="F_closed_loop_2x2.pdf", tau=10.0, tau_max_q=0
             j = piv[[m, REF_METHOD]].dropna()
             d = j[m].values - j[REF_METHOD].values
             if len(d) < 1 or np.ptp(d) == 0:
-                P[r, c], ES[r, c], PW[r, c] = 1.0, 0.0, 0.0
+                P[r, c], ES[r, c] = 1.0, 0.0
+                CIL[r, c], CIH[r, c] = 0.0, 0.0
                 continue
             try:
                 P[r, c] = scipy_stats.wilcoxon(
@@ -924,7 +922,7 @@ def fig_closed_loop_grid(df, path="F_closed_loop_2x2.pdf", tau=10.0, tau_max_q=0
                 except ValueError:
                     P[r, c] = 1.0
             ES[r, c] = _rank_biserial(d)
-            PW[r, c] = _boot_power(d)
+            CIL[r, c], CIH[r, c] = _boot_rb_ci(d)
     SIG = np.zeros_like(P, dtype=bool)
     Padj = np.full_like(P, np.nan)
     for c in range(5):
@@ -1034,10 +1032,10 @@ def fig_closed_loop_grid(df, path="F_closed_loop_2x2.pdf", tau=10.0, tau_max_q=0
             axd.text(
                 c,
                 r + 0.28,
-                f"pwr {PW[r,c]:.2f}",
+                f"[{CIL[r,c]:.2f}, {CIH[r,c]:.2f}]",
                 ha="center",
                 va="center",
-                fontsize=5.6,
+                fontsize=5.0,
                 color=tc,
             )
     axd.set_xticks(np.arange(-0.5, 5), minor=True)
@@ -1062,7 +1060,7 @@ def fig_closed_loop_grid(df, path="F_closed_loop_2x2.pdf", tau=10.0, tau_max_q=0
         1.015,
         rf"Wilcoxon signed-rank, Holm-corrected ($n{{=}}{n_blocks}$ blocks)" + "\n"
         r"$^{***}p<0.001$  $^{**}p<0.01$  $^{*}p<0.05$   $\cdot$   "
-        r"$\mathrm{ns}$ = n.s.   $\cdot$   pwr = power",
+        r"$\mathrm{ns}$ = n.s.   $\cdot$   [ ] = 95\% CI on $r$",
         transform=axd.transAxes,
         ha="center",
         va="bottom",
@@ -1100,6 +1098,23 @@ TIMING_HARDWARE = (
     # Kept terse: this caption sits in a single column of an 8-page RA-L
     # submission with zero slack, and the longer wording cost a whole page.
     r"an Intel Core i7-11800H, non-real-time Ubuntu kernel, single Python process"
+)
+# R8.9 asked Table IV to report numeric precision and memory alongside the
+# hardware. Both are configuration facts, not run outputs, so they live here with
+# the rest of the caption text. Precision: no torch.set_default_dtype anywhere in
+# predictive_dyn_models, so PC-RNN-I and the LSTM policy run at torch's float32
+# default; every NumPy-based learner (LWPR, LoG-GP, CerebNet, the [21] family) is
+# float64. Memory: summed nbytes/element_size over each learner's arrays and
+# tensors right after OnlineLearningModel(model_type=m, input_dim=3,
+# output_dim=12) -- the closed-loop constructor call, which passes no kwargs, so
+# these are the sizes actually used. Measured: LWPR 0.09, CerebNet 0.18, UORO
+# 0.18, PC-RNN-I 0.85, LoG-GP 98.3 MB. LoG-GP is the outlier because its
+# constructor pre-allocates K as [pts*outs, pts*N] = [1200, 10000] float64 = 96 MB
+# regardless of how many points arrive; the others grow with the data. Hence
+# "at start-up": LWPR in particular allocates receptive fields online.
+TIMING_ENVIRONMENT = (
+    r"float32 (PC-RNN-I, policy), float64 elsewhere; start-up model state "
+    r"$<$1\,MB except LoG-GP (98\,MB, pre-allocated)"
 )
 TIMING_SCOPE = (
     r"computation only, excluding motion-capture reception and motor "
@@ -1171,6 +1186,7 @@ def make_timing_table(df, path="timing_table.tex", budget_ms=50.0):
         + (rf"; {TIMING_SCOPE}" if TIMING_SCOPE else "")
         + rf". {bm:.0f}\,ms is the {1000.0 / bm:g}\,Hz control period{_strictest}."
         + (rf" Measured on {TIMING_HARDWARE}." if TIMING_HARDWARE else "")
+        + (rf" {TIMING_ENVIRONMENT}." if TIMING_ENVIRONMENT else "")
         + r"}",
         r"\label{tab:timing}",
         r"\begin{tabular}{lrrrr}",
@@ -3657,6 +3673,16 @@ def make_openloop_full_table(df=None, path=None, openloop_data=None):
     if openloop_data is None:
         openloop_data = load_openloop_multiseed(OPENLOOP_MULTISEED_PKL)
     ol = _openloop_by_display(openloop_data)
+    # CerebNet is reported at its published single update only. Its inner loop is
+    # NOT an inference depth: _update_cerebnet computes the error once, outside
+    # the loop, and the reservoir state is frozen, so N applications sum exactly
+    # to one step at N*eta. Kalidindi et al. (2019) define one update per
+    # simulation step and justify the rule as covariance-based plasticity, not
+    # gradient descent, so there is no multi-step version of the method to
+    # report. Printed beside "PC (N=...)" the label would invite the reading that
+    # N is the same knob for both. The sweep stays in the pickle; only its
+    # publication stops here.
+    ol = {n: v for n, v in ol.items() if not n.startswith("CerebNet (N=")}
     # Provenance lives here now: this is the only table reporting the open-loop
     # regime, so the evidence behind it has to be stated here rather than in the
     # closed-loop table's caption.
@@ -3681,9 +3707,21 @@ def make_openloop_full_table(df=None, path=None, openloop_data=None):
         rf"\caption{{Open-loop one-step prediction RMSE over {_n_ol_traj} test "
         rf"trajectories"
         + (rf" ({ol_len[2]} samples)" if ol_len else "")
-        + rf", mean $\pm$ s.d.\ across seeds, best first. "
-        rf"No spread: deterministic method. \emph{{div.}}: non-finite RMSE on at "
-        rf"least one seed.}}",
+        + rf", mean $\pm$ s.d.\ across seeds, best first."
+        # Each notation is explained only when it actually appears in the body.
+        # With the CerebNet N rows gone every remaining method is stochastic and
+        # none diverges, so both sentences would otherwise be dead text.
+        + (
+            r" No spread: deterministic method."
+            if any(v["std"] == 0 for _, v in finite)
+            else ""
+        )
+        + (
+            r" \emph{div.}: non-finite RMSE on at least one seed."
+            if diverged
+            else ""
+        )
+        + r"}",
         r"\label{tab:openloop_full}",
         r"\begin{tabular}{lr@{\hskip 1.2em}lr}",
         r"\toprule",
